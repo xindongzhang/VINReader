@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="transparent">#00000000</color>
+    <color name="bottomcolor">#50000000</color>
+    <color name="maskframe">#ff000000</color>
+    <color name="maskcolor">#60000000</color>
+    <color name="RED">#FFFF0000</color>
+</resources>

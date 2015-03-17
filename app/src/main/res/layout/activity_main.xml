@@ -1,0 +1,59 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="horizontal">
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"/>
+    <SurfaceView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/camera_preview"/>
+
+    <com.example.cggi_04.vinreader.CameraMask
+        android:id="@+id/camera_mask"
+        android:scaleType="matrix"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/transparent"
+        ></com.example.cggi_04.vinreader.CameraMask>
+
+    <LinearLayout
+        android:id="@+id/camera_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="214dp"
+            android:layout_weight="0.99"
+            android:background="@color/transparent" >
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="bottom">
+
+        <Button
+            android:id="@+id/bCapture"
+            android:layout_width="64dip"
+            android:layout_height="64dip"
+            android:gravity="center"
+            android:layout_centerHorizontal ="true"
+            android:layout_alignParentBottom="true"
+            android:text="拍照"
+            android:color="#99CC00"
+            android:onClick="Capture"/>
+
+    </RelativeLayout>
+
+</FrameLayout>
