@@ -1,10 +1,10 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
     <FrameLayout
         android:layout_width="fill_parent"
@@ -41,19 +41,33 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:gravity="bottom">
+        android:gravity="bottom"
+        android:background="@color/transparent">
 
-        <Button
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+         <com.example.cggi_04.vinreader.CircleButton
+            android:id="@+id/bReturn"
+            android:layout_width="64dip"
+            android:layout_height="64dip"
+            android:gravity="center"
+            app:cb_color="@color/refresh"
+            android:src="@drawable/ic_refresh"
+            android:onClick="Refresh" />
+        <com.example.cggi_04.vinreader.CircleButton
             android:id="@+id/bCapture"
             android:layout_width="64dip"
             android:layout_height="64dip"
             android:gravity="center"
-            android:layout_centerHorizontal ="true"
-            android:layout_alignParentBottom="true"
-            android:text="拍照"
-            android:color="#99CC00"
-            android:onClick="Capture"/>
+            app:cb_color="@color/capture"
+            android:src="@drawable/ic_capture"
+            android:onClick="Capture" />
 
+        </LinearLayout>
     </RelativeLayout>
 
 </FrameLayout>

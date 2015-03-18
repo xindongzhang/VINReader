@@ -4,5 +4,6 @@
     <color name="bottomcolor">#50000000</color>
     <color name="maskframe">#ff000000</color>
     <color name="maskcolor">#60000000</color>
-    <color name="RED">#FFFF0000</color>
+    <color name="refresh">#ff1ebeff</color>
+    <color name="capture">#ff12ff32</color>
 </resources>

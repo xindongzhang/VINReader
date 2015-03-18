@@ -142,18 +142,20 @@ public class MainActivity extends Activity implements  Callback{
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraApp");
+       // File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/VinReader");
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
 
         // Create the storage directory if it does not exist
+        boolean IsSuccess = true;
         if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
-                Log.d("MyCameraApp", "failed to create directory");
-                return null;
-            }
+            IsSuccess = mediaStorageDir.mkdir();
         }
+        if (IsSuccess)
+            Log.d("create Directory","success");
+        else
+            Log.d("did not create","fail!");
 
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -192,12 +194,29 @@ public class MainActivity extends Activity implements  Callback{
         }
     };
 
+
+    @Override
+    public void onPause(){
+        Log.d("Stateinfo","onPause");
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy(){
+        Log.d("Stateinfo","onDestroy");
+        super.onDestroy();
+    }
     public void Capture(View view) {
-        showToast("I love Hefang");
+        showToast("Camera is taking an picture!");
         Log.d("capture", "Capturing an image!");
         mCamera.takePicture(null, null,mPicture );
     }
 
+    //恢复到采集照片的时候
+    public void Refresh(View view) {
+        Log.d("Restart","Restarting camera");
+        mCamera.startPreview();
+    }
     //没有logcat，用这个来显示调试信息
     private void showToast(String msg) {
         Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
@@ -227,6 +246,7 @@ public class MainActivity extends Activity implements  Callback{
                 break;
         }
         params.setPreviewSize(previewSize.width, previewSize.height);
+
         maxX=previewSize.width-40;
         maxY=previewSize.height-40;
         Log.v("maxX", maxX+"  * "+maxY);
@@ -240,12 +260,12 @@ public class MainActivity extends Activity implements  Callback{
         }
 
         picturebili = (float)pictureSize.width/(float)width;
-        params.setPictureSize(pictureSize.width, pictureSize.height);
+        params.setPictureSize(pictureSize.width-40, pictureSize.height-40);
         Log.v("xinli", pictureSize.width +" * "+pictureSize.height);
 
         params.setPictureFormat(PixelFormat.JPEG);
         mCamera.setParameters(params);
-        mCamera.setDisplayOrientation(90);
+        //mCamera.setDisplayOrientation(90);
 
         try {
             mCamera.setPreviewDisplay(mSurfaceHolder);
