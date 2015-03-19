@@ -29,6 +29,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -56,6 +57,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.cggi_04.vinreader.CameraMask;
+import com.googlecode.tesseract.android.TessBaseAPI;
 
 public class MainActivity extends Activity implements  Callback{
 
@@ -79,7 +81,6 @@ public class MainActivity extends Activity implements  Callback{
     private Camera.Size pictureSize;
     private Camera.Size previewSize;
 
-    private static final String TESSBASE_PATH ="/sdcard";
     private String uuid;
     private static final int NONE = 0;
     private static final int DRAG = 1;
@@ -111,7 +112,10 @@ public class MainActivity extends Activity implements  Callback{
     private Handler h=new Handler();
 
     //Button bCapture;
-
+    private EditText VinCode;
+    //
+    private boolean capture_press;
+    static private String IMAGE_PATH;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //super.onCreate(savedInstanceState);
@@ -125,7 +129,9 @@ public class MainActivity extends Activity implements  Callback{
         setContentView(R.layout.activity_main);
 
         //设置camera surface holder
+        capture_press = false;
         mpreview = (SurfaceView) this.findViewById(R.id.camera_preview);
+        VinCode = (EditText) this.findViewById(R.id.et_vincode);
         mSurfaceHolder = mpreview.getHolder();
         mSurfaceHolder.addCallback(this);
         mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -163,6 +169,7 @@ public class MainActivity extends Activity implements  Callback{
         if (type == MEDIA_TYPE_IMAGE){
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                     "IMG_"+ timeStamp + ".jpg");
+            IMAGE_PATH = mediaStorageDir.getPath() + File.separator +"IMG_"+ timeStamp + ".jpg";
         } else if(type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                     "VID_"+ timeStamp + ".mp4");
@@ -206,16 +213,48 @@ public class MainActivity extends Activity implements  Callback{
         Log.d("Stateinfo","onDestroy");
         super.onDestroy();
     }
+
+    public static String getSDPath() {
+        File sdDir = null;
+        boolean sdCardExist = Environment.getExternalStorageState().equals(
+                android.os.Environment.MEDIA_MOUNTED); // ÅÐ¶Ïsd¿¨ÊÇ·ñ´æÔÚ
+        if (sdCardExist) {
+            sdDir = Environment.getExternalStorageDirectory();// »ñÈ¡Íâ´æÄ¿Â¼
+        }
+        return sdDir.toString();
+    }
     public void Capture(View view) {
-        showToast("Camera is taking an picture!");
-        Log.d("capture", "Capturing an image!");
-        mCamera.takePicture(null, null,mPicture );
+        if (!capture_press){
+            showToast("Camera is taking an picture!hahahahh!!!");
+            mCamera.takePicture(null, null, mPicture);
+            /*--------------*/
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;
+            Bitmap bitmap = BitmapFactory.decodeFile(IMAGE_PATH, options);
+            TessBaseAPI baseApi = new TessBaseAPI();
+            File path = Environment.getExternalStorageDirectory();
+
+            Log.d("init","init ing");
+            showToast(getSDPath()+"/VinReader/eng.traineddata");
+            //baseApi.init(getSDPath()+"/VinReader/eng.traineddata", "eng");
+            Log.d("init","init finish");
+            //baseApi.setImage(bitmap);
+            //String recognizedText = baseApi.getUTF8Text();
+            baseApi.end();
+            /*--------------*/
+            VinCode.setText("123123");
+            VinCode.setVisibility(View.VISIBLE);
+        }else {
+
+        }
     }
 
     //恢复到采集照片的时候
     public void Refresh(View view) {
         Log.d("Restart","Restarting camera");
+        VinCode.setVisibility(View.INVISIBLE);
         mCamera.startPreview();
+        capture_press = false;
     }
     //没有logcat，用这个来显示调试信息
     private void showToast(String msg) {

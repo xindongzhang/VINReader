@@ -6,4 +6,6 @@
     <color name="maskcolor">#60000000</color>
     <color name="refresh">#ff1ebeff</color>
     <color name="capture">#ff12ff32</color>
+    <color name="editbox">#ff0897ff</color>
+    <color name="edittex">#ffffffff</color>
 </resources>

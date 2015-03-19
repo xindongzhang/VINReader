@@ -47,6 +47,24 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="64dp"
+                android:gravity="left"
+                android:id="@+id/et_vincode"
+                android:background="@color/editbox"
+                android:textColor="@color/edittex"
+                android:textSize="30dp"
+                android:textAlignment="center"
+                android:visibility="invisible"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="end">
 
