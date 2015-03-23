@@ -167,8 +167,8 @@ public class MainActivity extends Activity implements  Callback{
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
         if (type == MEDIA_TYPE_IMAGE){
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
+            //mediaFile = new File(mediaStorageDir.getPath() + File.separator +"IMG_"+ timeStamp + ".jpg");
+            mediaFile = new File(getSDPath()+"/ocr.jpg");
             IMAGE_PATH = mediaStorageDir.getPath() + File.separator +"IMG_"+ timeStamp + ".jpg";
         } else if(type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
@@ -225,24 +225,22 @@ public class MainActivity extends Activity implements  Callback{
     }
     public void Capture(View view) {
         if (!capture_press){
-            showToast("Camera is taking an picture!hahahahh!!!");
             mCamera.takePicture(null, null, mPicture);
             /*--------------*/
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 2;
-            Bitmap bitmap = BitmapFactory.decodeFile(IMAGE_PATH, options);
+            Bitmap bitmap = BitmapFactory.decodeFile(getSDPath()+"/ocr.jpg", options);
             TessBaseAPI baseApi = new TessBaseAPI();
-            File path = Environment.getExternalStorageDirectory();
-
-            Log.d("init","init ing");
-            showToast(getSDPath()+"/VinReader/eng.traineddata");
-            //baseApi.init(getSDPath()+"/VinReader/eng.traineddata", "eng");
-            Log.d("init","init finish");
-            //baseApi.setImage(bitmap);
-            //String recognizedText = baseApi.getUTF8Text();
+            baseApi.setDebug(true);
+            baseApi.init(getSDPath(),"eng");
+            //baseApi.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, "1234567890QWERTYUIOPASDFGHJKLZXCVBNM");
+            //baseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "!@#$%^&*()_+=-qwertyuiop[]}{" +
+            //                                                       "asdgh;:'\"\\|~`xcvbnm,./<>?");
+            baseApi.setImage(bitmap);
+            String recognizedText = baseApi.getUTF8Text();
             baseApi.end();
             /*--------------*/
-            VinCode.setText("123123");
+            VinCode.setText(recognizedText);
             VinCode.setVisibility(View.VISIBLE);
         }else {
 
