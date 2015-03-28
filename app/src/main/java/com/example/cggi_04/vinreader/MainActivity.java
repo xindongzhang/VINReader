@@ -2,6 +2,7 @@ package com.example.cggi_04.vinreader;
 
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -64,10 +66,6 @@ public class MainActivity extends Activity implements  Callback{
     float s=1.0f;
     SurfaceView mpreview;
     private SurfaceHolder mSurfaceHolder;
-    private ImageButton bigbtn;
-    private ImageButton smallbtn;
-    private ImageButton photobtn;
-    private float picturebili;
     private CameraMask maskView;
     private ImageView img;
 
@@ -81,41 +79,15 @@ public class MainActivity extends Activity implements  Callback{
     private Camera.Size pictureSize;
     private Camera.Size previewSize;
 
-    private String uuid;
-    private static final int NONE = 0;
-    private static final int DRAG = 1;
-    private static final int ZOOM = 2;
-    private float mX;
-    private float mY;
-    private float mGap;
-    private float aX;
-    private float bX;
-    private float aY;
-    private float bY;
-    private float nx;
-    private float ny;
-    private Point	screenResolution;
-    private float xx;
-    private float yy;
-    private float mScaledTouchSlop;
-    private boolean mAutoIncrement = false;
-    private boolean mAutoDecrement = false;
-    private boolean hIncrement=false;
-    private boolean hDecrement=false;
-
-    private int mode = NONE;
-    private float oldDist;
-    private PointF start = new PointF();
-    private PointF mid = new PointF();
-    private GestureDetector detector;
-
-    private Handler h=new Handler();
-
     //Button bCapture;
     private EditText VinCode;
     //
     private boolean capture_press;
-    static private String IMAGE_PATH;
+
+    //Image
+    private Bitmap image;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //super.onCreate(savedInstanceState);
@@ -141,57 +113,17 @@ public class MainActivity extends Activity implements  Callback{
         nowframe = maskView.getmFrame();
     }
 
-    public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
 
-    private static File getOutputMediaFile(int type){
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
-       // File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/VinReader");
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
-        boolean IsSuccess = true;
-        if (! mediaStorageDir.exists()){
-            IsSuccess = mediaStorageDir.mkdir();
-        }
-        if (IsSuccess)
-            Log.d("create Directory","success");
-        else
-            Log.d("did not create","fail!");
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
-            //mediaFile = new File(mediaStorageDir.getPath() + File.separator +"IMG_"+ timeStamp + ".jpg");
-            mediaFile = new File(getSDPath()+"/ocr.jpg");
-            IMAGE_PATH = mediaStorageDir.getPath() + File.separator +"IMG_"+ timeStamp + ".jpg";
-        } else if(type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
-        } else {
-            return null;
-        }
-
-        return mediaFile;
-    }
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
-            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-            if (pictureFile == null){
-                return;
-            }
-
+            File pictureFile = new File(getSDPath()+"/ocr.jpg");
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(data);
+                fos.flush();
                 fos.close();
             } catch (FileNotFoundException e) {
                 Log.d("fnf", "File not found: " + e.getMessage());
@@ -217,30 +149,55 @@ public class MainActivity extends Activity implements  Callback{
     public static String getSDPath() {
         File sdDir = null;
         boolean sdCardExist = Environment.getExternalStorageState().equals(
-                android.os.Environment.MEDIA_MOUNTED); // ÅÐ¶Ïsd¿¨ÊÇ·ñ´æÔÚ
+                android.os.Environment.MEDIA_MOUNTED);
         if (sdCardExist) {
-            sdDir = Environment.getExternalStorageDirectory();// »ñÈ¡Íâ´æÄ¿Â¼
+            sdDir = Environment.getExternalStorageDirectory();
         }
         return sdDir.toString();
     }
-    public void Capture(View view) {
+
+    public static Bitmap createBitmapFromPath(String path, int sampleSize){
+
+        // Creating a bitmap from the given path
+        Bitmap bitmap = null;
+        try{
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = false;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            options.inSampleSize = sampleSize;
+            options.inPurgeable = true;
+            bitmap = BitmapFactory.decodeFile(path, options);
+
+        }
+        catch(OutOfMemoryError e){
+            //Memory error occured.
+        }
+        return bitmap;
+    }
+
+    public void Capture(View view) throws IOException {
         if (!capture_press){
             mCamera.takePicture(null, null, mPicture);
             /*--------------*/
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = 2;
-            Bitmap bitmap = BitmapFactory.decodeFile(getSDPath()+"/ocr.jpg", options);
+            /*--------------*/
+           // BitmapFactory.Options options = new BitmapFactory.Options();
+           // options.inSampleSize = 8;
+           // File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+           // FileInputStream fis = new FileInputStream(pictureFile.toString());
+           // image = BitmapFactory.decodeStream(fis);
+            image =  createBitmapFromPath(getSDPath()+"/ocr.jpg", 2);
+
             TessBaseAPI baseApi = new TessBaseAPI();
             baseApi.setDebug(true);
             baseApi.init(getSDPath(),"eng");
-            //baseApi.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, "1234567890QWERTYUIOPASDFGHJKLZXCVBNM");
-            //baseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "!@#$%^&*()_+=-qwertyuiop[]}{" +
-            //                                                       "asdgh;:'\"\\|~`xcvbnm,./<>?");
-            baseApi.setImage(bitmap);
-            String recognizedText = baseApi.getUTF8Text();
+            baseApi.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, "1234567890QWERTYUIOPASDFGHJKLZXCVBNM");
+            baseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "!@#$%^&*()_+=-qwertyuiop[]}{" +
+                                                                   "asdgh;:'\"\\|~`xcvbnm,./<>?");
+            baseApi.setImage(image);
+            //String recognizedText = baseApi.getUTF8Text();
             baseApi.end();
             /*--------------*/
-            VinCode.setText(recognizedText);
+            VinCode.setText(Integer.toString(image.getHeight()));
             VinCode.setVisibility(View.VISIBLE);
         }else {
 
@@ -266,8 +223,10 @@ public class MainActivity extends Activity implements  Callback{
 
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                               int height) {
+    public void surfaceChanged(SurfaceHolder holder,
+                                 int format,
+                                 int width,
+                                 int height) {
         Parameters params = mCamera.getParameters();
 
 //		if used in android 1.6
@@ -296,7 +255,7 @@ public class MainActivity extends Activity implements  Callback{
                 break;
         }
 
-        picturebili = (float)pictureSize.width/(float)width;
+        //picturebili = (float)pictureSize.width/(float)width;
         params.setPictureSize(pictureSize.width-40, pictureSize.height-40);
         Log.v("xinli", pictureSize.width +" * "+pictureSize.height);
 
@@ -335,6 +294,7 @@ public class MainActivity extends Activity implements  Callback{
             }
         }
     }
+
 }
 
 
